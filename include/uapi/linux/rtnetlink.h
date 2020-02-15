@@ -177,6 +177,10 @@ enum {
 #define RTM_DELVLAN	RTM_DELVLAN
 	RTM_GETVLAN,
 #define RTM_GETVLAN	RTM_GETVLAN
+	/*Added by EKA*/
+	RTM_ALTROUTE,
+#define RTM_ALTROUTE	RTM_ALTROUTE
+	/* End added by EKA*/
 
 	__RTM_MAX,
 #define RTM_MAX		(((__RTM_MAX + 3) & ~3) - 1)

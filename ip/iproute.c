@@ -2293,6 +2293,14 @@ int do_iproute(int argc, char **argv)
 {
 	if (argc < 1)
 		return iproute_list_flush_or_save(0, NULL, IPROUTE_LIST);
+	/*Added by EKA*/
+	if (matches(*argv, "altroute") == 0){
+		printf("Que veux tu %s?\n", argv[2]);
+		return iproute_modify(RTM_ALTROUTE, NLM_F_CREATE|NLM_F_EXCL,
+				      argc-1, argv+1);
+	}
+
+	/*End added by EKA */
 
 	if (matches(*argv, "add") == 0)
 		return iproute_modify(RTM_NEWROUTE, NLM_F_CREATE|NLM_F_EXCL,

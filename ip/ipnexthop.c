@@ -333,6 +333,18 @@ static int ipnh_modify(int cmd, unsigned int flags, int argc, char **argv)
 	__u32 nh_flags = 0;
 
 	while (argc > 0) {
+#if 0
+		if (!strcmp(*argv, "altid")) {
+			__u32 id;
+			NEXT_ARG();
+			if (get_unsigned(&id, *argv, 0))
+				invarg("invalid id value", *argv);
+			addattr32(&req.n, sizeof(req), NHA_ALT_ID, id);
+			printf("altid %s %d\n", argv[0], id);
+		}
+
+		else 
+#endif
 		if (!strcmp(*argv, "id")) {
 			__u32 id;
 
@@ -547,6 +559,11 @@ int do_ipnh(int argc, char **argv)
 	if (!matches(*argv, "add"))
 		return ipnh_modify(RTM_NEWNEXTHOP, NLM_F_CREATE|NLM_F_EXCL,
 				   argc-1, argv+1);
+
+	if (!matches(*argv, "altnh"))
+		return ipnh_modify(RTM_ALTNEXTHOP, NLM_F_CREATE|NLM_F_EXCL,
+				   argc-1, argv+1);
+	
 	if (!matches(*argv, "replace"))
 		return ipnh_modify(RTM_NEWNEXTHOP, NLM_F_CREATE|NLM_F_REPLACE,
 				   argc-1, argv+1);

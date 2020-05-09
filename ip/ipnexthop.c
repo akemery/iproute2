@@ -172,7 +172,7 @@ static void print_nh_group(FILE *fp, const struct rtattr *grps_attr)
 	int i;
 
 	if (!num || num * sizeof(*nhg) != RTA_PAYLOAD(grps_attr)) {
-		fprintf(fp, "<invalid nexthop group>");
+		fprintf(fp, "(%ld) and (%ld) <invalid nexthop group>", sizeof(*nhg), RTA_PAYLOAD(grps_attr));
 		return;
 	}
 
@@ -231,6 +231,8 @@ int print_nexthop(struct nlmsghdr *n, void *arg)
 		print_uint(PRINT_ANY, "id", "id %u ",
 			   rta_getattr_u32(tb[NHA_ID]));
 
+	if(tb[NHA_GROUP_TYPE])
+		print_nh_group(fp, tb[NHA_GROUP_TYPE]);
 	if (tb[NHA_GROUP])
 		print_nh_group(fp, tb[NHA_GROUP]);
 
@@ -399,11 +401,22 @@ static int ipnh_modify(int cmd, unsigned int flags, int argc, char **argv)
 				req.nhm.nh_family = AF_INET;
 		} else if (!strcmp(*argv, "onlink")) {
 			nh_flags |= RTNH_F_ONLINK;
-		} else if (!strcmp(*argv, "group")) {
+		} else if( (cmd == RTM_NEWNEXTHOP ) && !strcmp(*argv, "lfa")){
+			NEXT_ARG();
+			req.n.nlmsg_flags |= NLM_F_LFANEXTHOP;
+			if (add_nh_group_attr(&req.n, sizeof(req), *argv))
+				invarg("\"group or lfa \" value is invalid\n", *argv);
+		}else if( (cmd == RTM_DELNEXTHOP ) && !strcmp(*argv, "lfa")){
+			__u32 id;
+			NEXT_ARG();
+			req.n.nlmsg_flags |= NLM_F_LFANEXTHOP;
+			if (get_unsigned(&id, *argv, 0))
+				invarg("invalid id value tot", *argv);
+		}else if (!strcmp(*argv, "group")  ) {
 			NEXT_ARG();
 
 			if (add_nh_group_attr(&req.n, sizeof(req), *argv))
-				invarg("\"group\" value is invalid\n", *argv);
+				invarg("\"group or lfa \" value is invalid\n", *argv);
 		} else if (matches(*argv, "protocol") == 0) {
 			__u32 prot;
 
